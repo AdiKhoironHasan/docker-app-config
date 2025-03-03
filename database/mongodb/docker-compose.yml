@@ -1,0 +1,94 @@
+version: '3.8'
+services:
+  # mongodb: # single node
+  #   image: mongo:6.0
+  #   container_name: database-mongodb
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongodb-data:/data/db
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: root
+  #     MONGO_INITDB_ROOT_PASSWORD: example
+  #   restart: always
+
+  mongo1:
+    image: mongo:6.0
+    container_name: mongo1
+    command: mongod --replSet rs0 --port 27017 --bind_ip_all --auth --keyFile /data/keyfile/mongo-keyfile
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./keyfile/mongo-keyfile:/data/keyfile/mongo-keyfile:ro
+      - mongo1_data:/data/db
+    networks:
+      - mongo_network
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    restart: always
+
+  mongo2:
+    image: mongo:6.0
+    container_name: mongo2
+    command: mongod --replSet rs0 --port 27017 --bind_ip_all --auth --keyFile /data/keyfile/mongo-keyfile
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./keyfile/mongo-keyfile:/data/keyfile/mongo-keyfile:ro
+      - mongo2_data:/data/db
+    networks:
+      - mongo_network
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    depends_on:
+      - mongo1
+    restart: always
+
+  mongo3:
+    image: mongo:6.0
+    container_name: mongo3
+    command: mongod --replSet rs0 --port 27017 --bind_ip_all --auth --keyFile /data/keyfile/mongo-keyfile
+    ports:
+      - "27019:27017"
+    volumes:
+      - ./keyfile/mongo-keyfile:/data/keyfile/mongo-keyfile:ro
+      - mongo3_data:/data/db
+    networks:
+      - mongo_network
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    depends_on:
+      - mongo1
+    restart: always
+
+  # MongoDB setup script to initialize the replica set
+  mongo_setup:
+    image: mongo:6.0
+    container_name: mongo_setup
+    restart: on-failure
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    networks:
+      - mongo_network
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - ./keyfile/mongo-keyfile:/data/keyfile/mongo-keyfile:ro
+      - ./scripts:/scripts
+    entrypoint: ["bash", "/scripts/setup.sh"]
+
+volumes:
+  mongodb-data:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
+
+networks:
+  mongo_network:
+    driver: bridge
