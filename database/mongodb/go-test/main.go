@@ -14,7 +14,7 @@ import (
 
 func main() {
 	// Replace with your actual WSL IP if needed
-	uri := "mongodb://root:example@localhost:27017,localhost:27018,localhost:27019/?authSource=admin&replicaSet=rs0"
+	uri := "mongodb://root:example@localhost:27017,localhost:27018,localhost:27019/?authSource=admin&replicaSet=myReplicaSet"
 
 	// Create a context with timeout for database operations
 	// ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)

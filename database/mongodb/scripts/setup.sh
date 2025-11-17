@@ -1,21 +1,17 @@
 #!/bin/bash
-echo "Waiting for MongoDB instances to start..."
+echo "Waiting 30s for MongoDB instances to start..."
 sleep 30
-
-# Get WSL IP address dynamically
-#MY_IP=$(ip addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
-MY_IP=localhost
-echo "Using WSL IP address: ${MY_IP}"
 
 echo "Initializing replica set..."
 # Connect to mongo1 with authentication
-mongosh --host mongo1 --port 27017 -u root -p example --authenticationDatabase admin <<EOF
+
+mongosh --host mongodb1 --port 27017 -u mongol -p mongol_password --authenticationDatabase admin <<EOF
 rs.initiate({
-  _id: "rs0",
+  _id: "mongodbCluster1",
   members: [
-    { _id: 0, host: "${MY_IP}:27017", priority: 2 },
-    { _id: 1, host: "${MY_IP}:27018", priority: 1 },
-    { _id: 2, host: "${MY_IP}:27019", priority: 1 }
+    { _id: 0, host: "localhost:27027"},
+    { _id: 1, host: "localhost:27028"},
+    { _id: 2, host: "localhost:27029"}
   ]
 });
 
@@ -26,16 +22,15 @@ sleep(2000);
 rs.status();
 
 // Verify authentication is working
-db.auth('root', 'example');
+db.auth('mongol', 'mongol_password');
 
 // Output the connection string for reference
 print("\n==========================================================");
 print("MongoDB Replica Set is ready!");
 print("Use the following connection string in MongoDB Compass:");
-print("mongodb://root:example@${MY_IP}:27017,${MY_IP}:27018,${MY_IP}:27019/?authSource=admin&replicaSet=rs0");
+print("mongodb://mongol:mongol_password@localhost:27027,localhost:27028,localhost:27029/?authSource=admin&replicaSet=mongodbCluster1");
 print("==========================================================\n");
 EOF
 
-echo "MongoDB replica set initialized with WSL IP: ${MY_IP}"
 echo "Connection string for MongoDB Compass:"
-echo "mongodb://root:example@${MY_IP}:27017,${MY_IP}:27018,${MY_IP}:27019/?authSource=admin&replicaSet=rs0"
+echo "mongodb://mongol:mongol_password@localhost:27027,localhost:27028,localhost:27029/?authSource=admin&replicaSet=mongodbCluster1"

@@ -12,56 +12,56 @@ services:
   #     MONGO_INITDB_ROOT_PASSWORD: example
   #   restart: always
 
-  mongo1:
+  mongodb1:
     image: mongo:6.0
-    container_name: mongo1
-    command: mongod --replSet rs0 --port 27017 --bind_ip_all --auth --keyFile /data/keyfile/mongo-keyfile
+    container_name: mongodb1
+    command: mongod --replSet mongodbCluster1 --port 27017 --bind_ip 0.0.0.0 --bind_ip_all --auth --keyFile /data/keyfile/mongo-keyfile
     ports:
-      - "27017:27017"
+      - "27027:27017"
     volumes:
       - ./keyfile/mongo-keyfile:/data/keyfile/mongo-keyfile:ro
-      - mongo1_data:/data/db
+      - mongodb1-data:/data/db
     networks:
       - mongo_network
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_ROOT_USERNAME: mongol
+      MONGO_INITDB_ROOT_PASSWORD: mongol_password
     restart: always
 
-  mongo2:
+  mongodb2:
     image: mongo:6.0
-    container_name: mongo2
-    command: mongod --replSet rs0 --port 27017 --bind_ip_all --auth --keyFile /data/keyfile/mongo-keyfile
+    container_name: mongodb2
+    command: mongod --replSet mongodbCluster1 --port 27017 --bind_ip 0.0.0.0 --bind_ip_all --auth --keyFile /data/keyfile/mongo-keyfile
     ports:
-      - "27018:27017"
+      - "27028:27017"
     volumes:
       - ./keyfile/mongo-keyfile:/data/keyfile/mongo-keyfile:ro
-      - mongo2_data:/data/db
+      - mongodb2-data:/data/db
     networks:
       - mongo_network
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_ROOT_USERNAME: mongol
+      MONGO_INITDB_ROOT_PASSWORD: mongol_password
     depends_on:
-      - mongo1
+      - mongodb1
     restart: always
 
-  mongo3:
+  mongodb3:
     image: mongo:6.0
-    container_name: mongo3
-    command: mongod --replSet rs0 --port 27017 --bind_ip_all --auth --keyFile /data/keyfile/mongo-keyfile
+    container_name: mongodb3
+    command: mongod --replSet mongodbCluster1 --port 27017 --bind_ip 0.0.0.0 --bind_ip_all --auth --keyFile /data/keyfile/mongo-keyfile
     ports:
-      - "27019:27017"
+      - "27029:27017"
     volumes:
       - ./keyfile/mongo-keyfile:/data/keyfile/mongo-keyfile:ro
-      - mongo3_data:/data/db
+      - mongodb3-data:/data/db
     networks:
       - mongo_network
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_ROOT_USERNAME: mongol
+      MONGO_INITDB_ROOT_PASSWORD: mongol_password
     depends_on:
-      - mongo1
+      - mongodb1
     restart: always
 
   # MongoDB setup script to initialize the replica set
@@ -70,14 +70,14 @@ services:
     container_name: mongo_setup
     restart: on-failure
     depends_on:
-      - mongo1
-      - mongo2
-      - mongo3
+      - mongodb1
+      - mongodb2
+      - mongodb3
     networks:
       - mongo_network
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_ROOT_USERNAME: mongol
+      MONGO_INITDB_ROOT_PASSWORD: mongol_password
     volumes:
       - ./keyfile/mongo-keyfile:/data/keyfile/mongo-keyfile:ro
       - ./scripts:/scripts
@@ -85,9 +85,9 @@ services:
 
 volumes:
   mongodb-data:
-  mongo1_data:
-  mongo2_data:
-  mongo3_data:
+  mongodb1-data:
+  mongodb2-data:
+  mongodb3-data:
 
 networks:
   mongo_network:
